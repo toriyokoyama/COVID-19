@@ -11,6 +11,7 @@ import numpy as np
 from os import listdir
 import datetime
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 state_abbrev = {
         'AK': 'Alaska',
@@ -109,6 +110,9 @@ df['State'] = df['Province_State'].apply(lambda x: x.split(', ')).apply(lambda x
 df['State'] = df['State'].apply(lambda x: state_abbrev_inv.get(x,x))
 # make new key
 df['Key'] = (df['Admin2'] + ', ' + df['City_Area'] + ', ' + df['State']).apply(lambda x: x[2:] if x[0:2]==', ' else (x[4:] if x[0:4]==', , ' else x))
+
+#%%
+
 groupByUS = df[df['Country_Region']=='US'].groupby(['File_Date','Last_Update']).sum()[['Confirmed','Deaths','Recovered']].reset_index()
 groupByUS_NoDup = groupByUS[groupByUS.duplicated(['Last_Update'])==False]
 groupByState = df[df['Country_Region']=='US'].groupby(['File_Date','Last_Update','State']).sum()[['Confirmed','Deaths','Recovered']].reset_index()
@@ -120,5 +124,25 @@ groupByChina = df[df['Country_Region']=='Mainland China'].groupby(['File_Date','
 groupByChina_NoDup = groupByChina[groupByChina.duplicated(['Last_Update'])==False]
 groupBySKorea = df[df['Country_Region']=='South Korea'].groupby(['File_Date','Last_Update']).sum()[['Confirmed','Deaths','Recovered']].reset_index()
 groupBySKorea_NoDup = groupBySKorea[groupBySKorea.duplicated(['Last_Update'])==False]
+
+#%%
+
+plt.style.use('seaborn')
+x = groupByUS_NoDup[(groupByUS_NoDup['Confirmed']>1)]['File_Date']
+y = groupByUS_NoDup[(groupByUS_NoDup['Confirmed']>1)][['Confirmed','Deaths','Recovered']]
+plt.stackplot(x,y.values.T,labels=['Confirmed','Deaths','Recovered'])
+plt.xticks(rotation=45)
+plt.legend()
+plt.show()
+
+#%%
+
+plt.style.use('seaborn')
+x = groupByState_NoDup[(groupByState_NoDup['State']=='IL') & (groupByState_NoDup['Confirmed']>1)]['File_Date']
+y = groupByState_NoDup[(groupByState_NoDup['State']=='IL') & (groupByState_NoDup['Confirmed']>1)][['Confirmed','Deaths','Recovered']]
+plt.stackplot(x,y.values.T,labels=['Confirmed','Deaths','Recovered'])
+plt.xticks(rotation=45)
+plt.legend()
+plt.show()
 
 # git merge upstream/master
