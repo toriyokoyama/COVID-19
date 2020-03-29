@@ -13,6 +13,8 @@ import datetime
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+#%%
+
 state_abbrev = {
         'AK': 'Alaska',
         'AL': 'Alabama',
@@ -77,6 +79,7 @@ state_abbrev_inv = {}
 for k,v in state_abbrev.items():
     state_abbrev_inv[v] = k
 
+#%%
 
 path = '//home/toriyokoyama/Projects/covid19/csse_covid_19_data/csse_covid_19_daily_reports/'
 files = [f for f in listdir(path) if '.csv' in f]
@@ -113,36 +116,75 @@ df['Key'] = (df['Admin2'] + ', ' + df['City_Area'] + ', ' + df['State']).apply(l
 
 #%%
 
-groupByUS = df[df['Country_Region']=='US'].groupby(['File_Date','Last_Update']).sum()[['Confirmed','Deaths','Recovered']].reset_index()
-groupByUS_NoDup = groupByUS[groupByUS.duplicated(['Last_Update'])==False]
-groupByState = df[df['Country_Region']=='US'].groupby(['File_Date','Last_Update','State']).sum()[['Confirmed','Deaths','Recovered']].reset_index()
-groupByState_NoDup = groupByState[groupByState.duplicated(['Last_Update','State'])==False]
-groupByAreaState = df[df['Country_Region']=='US'].groupby(['File_Date','Last_Update','City_Area','State']).sum()[['Confirmed','Deaths','Recovered']].reset_index()
-groupByAreaState_NoDup = groupByAreaState[groupByAreaState.duplicated(['Last_Update','City_Area','State'])==False]
+groupByUS = df[df['Country_Region']=='US'].groupby(['File_Date']).sum()[['Confirmed','Deaths','Recovered']].reset_index()
+groupByState = df[df['Country_Region']=='US'].groupby(['File_Date','State']).sum()[['Confirmed','Deaths','Recovered']].reset_index()
+groupByAreaState = df[df['Country_Region']=='US'].groupby(['File_Date','City_Area','State']).sum()[['Confirmed','Deaths','Recovered']].reset_index()
 
-groupByChina = df[df['Country_Region']=='Mainland China'].groupby(['File_Date','Last_Update']).sum()[['Confirmed','Deaths','Recovered']].reset_index()
-groupByChina_NoDup = groupByChina[groupByChina.duplicated(['Last_Update'])==False]
-groupBySKorea = df[df['Country_Region']=='South Korea'].groupby(['File_Date','Last_Update']).sum()[['Confirmed','Deaths','Recovered']].reset_index()
-groupBySKorea_NoDup = groupBySKorea[groupBySKorea.duplicated(['Last_Update'])==False]
+groupByChina = df[df['Country_Region']=='Mainland China'].groupby(['File_Date']).sum()[['Confirmed','Deaths','Recovered']].reset_index()
+groupBySKorea = df[df['Country_Region']=='South Korea'].groupby(['File_Date']).sum()[['Confirmed','Deaths','Recovered']].reset_index()
+groupByItaly = df[df['Country_Region']=='Italy'].groupby(['File_Date']).sum()[['Confirmed','Deaths','Recovered']].reset_index()
 
 #%%
 
 plt.style.use('seaborn')
-x = groupByUS_NoDup[(groupByUS_NoDup['Confirmed']>1)]['File_Date']
-y = groupByUS_NoDup[(groupByUS_NoDup['Confirmed']>1)][['Confirmed','Deaths','Recovered']]
-plt.stackplot(x,y.values.T,labels=['Confirmed','Deaths','Recovered'])
+plt.fill_between('File_Date','Confirmed','Recovered',data=groupByChina,label='Confirmed')
+plt.fill_between('File_Date','Recovered','Deaths',data=groupByChina,label='Recovered')
+plt.fill_between('File_Date','Deaths',data=groupByChina,label='Deaths')
 plt.xticks(rotation=45)
-plt.legend()
+plt.xlabel('Date')
+plt.legend(loc='best',frameon=True)
+plt.title('Cumulative COVID-19 Statistics for China')
 plt.show()
 
 #%%
 
 plt.style.use('seaborn')
-x = groupByState_NoDup[(groupByState_NoDup['State']=='IL') & (groupByState_NoDup['Confirmed']>1)]['File_Date']
-y = groupByState_NoDup[(groupByState_NoDup['State']=='IL') & (groupByState_NoDup['Confirmed']>1)][['Confirmed','Deaths','Recovered']]
-plt.stackplot(x,y.values.T,labels=['Confirmed','Deaths','Recovered'])
+plt.fill_between('File_Date','Confirmed','Recovered',data=groupByItaly,label='Confirmed')
+plt.fill_between('File_Date','Recovered','Deaths',data=groupByItaly,label='Recovered')
+plt.fill_between('File_Date','Deaths',data=groupByItaly,label='Deaths')
 plt.xticks(rotation=45)
-plt.legend()
+plt.xlabel('Date')
+plt.legend(loc='best',frameon=True)
+plt.title('Cumulative COVID-19 Statistics for Italy')
 plt.show()
+
+#%%
+
+plt.style.use('seaborn')
+plt.fill_between('File_Date','Confirmed','Recovered',data=groupBySKorea,label='Confirmed')
+plt.fill_between('File_Date','Recovered','Deaths',data=groupBySKorea,label='Recovered')
+plt.fill_between('File_Date','Deaths',data=groupBySKorea,label='Deaths')
+plt.xticks(rotation=45)
+plt.xlabel('Date')
+plt.legend(loc='best',frameon=True)
+plt.title('Cumulative COVID-19 Statistics for South Korea')
+plt.show()
+
+#%%
+
+plt.style.use('seaborn')
+plt.fill_between('File_Date','Confirmed','Recovered',data=groupByUS,label='Confirmed')
+plt.fill_between('File_Date','Recovered','Deaths',data=groupByUS,label='Recovered')
+plt.fill_between('File_Date','Deaths',data=groupByUS,label='Deaths')
+plt.xticks(rotation=45)
+plt.xlabel('Date')
+plt.legend(loc='best',frameon=True)
+plt.title('Cumulative COVID-19 Statistics for US')
+plt.show()
+
+#%%
+
+plt.style.use('seaborn')
+plt.fill_between('File_Date','Confirmed','Recovered',data=groupByAreaState[(groupByAreaState['State']=='IL') & (groupByAreaState['Confirmed']>0)],label='Confirmed')
+plt.fill_between('File_Date','Recovered','Deaths',data=groupByAreaState[(groupByAreaState['State']=='IL') & (groupByAreaState['Confirmed']>0)],label='Recovered')
+plt.fill_between('File_Date','Deaths',data=groupByAreaState[(groupByAreaState['State']=='IL') & (groupByAreaState['Confirmed']>0)],label='Deaths')
+plt.xticks(rotation=45)
+plt.xlabel('Date')
+plt.legend(loc='best',frameon=True)
+plt.title('Cumulative COVID-19 Statistics for Illinois')
+plt.show()
+
+
+
 
 # git merge upstream/master
